@@ -1,11 +1,11 @@
 'use client';
 import {useLayoutEffect,useRef,type HTMLAttributes} from 'react';
-const letterDelay=(index:number,count:number,stagger:number)=>index*Math.min(stagger,count>1?300/(count-1):0);
+const letterDelay=(index:number,count:number,stagger:number)=>index*Math.min(stagger,count>1?600/(count-1):0);
 
-type Tag='h1'|'h2'|'h3'|'h4'|'h5'|'h6';
+type Tag='h1'|'h2'|'h3'|'h4'|'h5'|'h6'|'p';
 /** Keep React's text untouched; visual line copies are owned by this effect only. */
 export default function Heading({as:Tag='h2',children,...props}:HTMLAttributes<HTMLHeadingElement>&{as?:Tag;"data-reveal"?:string|boolean}) {
- const letters=true,stagger=18;
+ const letters=true,stagger=30;
  const source=useRef<HTMLSpanElement>(null),visual=useRef<HTMLSpanElement>(null);
  useLayoutEffect(()=>{
   const text=source.current,layer=visual.current,heading=text?.parentElement;
@@ -13,7 +13,6 @@ export default function Heading({as:Tag='h2',children,...props}:HTMLAttributes<H
   let active=true,frame=0,lastWidth=-1;
   const split=()=>{
    if(!active)return;
-   if(heading.classList.contains('heading-lines-ready')&&heading.classList.contains('reveal-visible'))heading.classList.add('reveal-settled');
    layer.replaceChildren();
    const walker=document.createTreeWalker(text,NodeFilter.SHOW_TEXT);
    const chars:{node:Text;start:number;end:number;top:number}[]=[];
@@ -33,6 +32,8 @@ export default function Heading({as:Tag='h2',children,...props}:HTMLAttributes<H
     const line=lines.at(-1);
     if(!line||Math.abs(line[0].top-char.top)>3)lines.push([char]);else line.push(char);
    }
+   // Very long editable paragraphs keep the block reveal instead of creating thousands of masks.
+   if(chars.length>1200&&!heading.matches('h1,h2,h3,h4,h5,h6')){heading.classList.remove('heading-lines-ready');return;}
    const origin=text.getBoundingClientRect();
    const units=letters?chars.map(char=>[char]):lines;
    units.forEach((line,index)=>{
@@ -53,6 +54,8 @@ export default function Heading({as:Tag='h2',children,...props}:HTMLAttributes<H
    });
    heading.classList.toggle('heading-lines-ready',lines.length>0);
   };
+  const settle=(event:AnimationEvent)=>{if(event.animationName==='headingLetterArrival'&&event.target===layer.lastElementChild?.firstElementChild)heading.classList.add('reveal-settled');};
+  heading.addEventListener('animationend',settle);
   const schedule=()=>{if(!active)return;cancelAnimationFrame(frame);frame=requestAnimationFrame(split);};
   const resize=new ResizeObserver(entries=>{
    const width=entries[0].contentRect.width;
@@ -60,7 +63,7 @@ export default function Heading({as:Tag='h2',children,...props}:HTMLAttributes<H
   });resize.observe(text);
   const mutation=new MutationObserver(schedule);mutation.observe(text,{childList:true,subtree:true,characterData:true});
   document.fonts.ready.then(schedule);schedule();
-  return()=>{active=false;cancelAnimationFrame(frame);resize.disconnect();mutation.disconnect();layer.replaceChildren();heading.classList.remove('heading-lines-ready');};
+  return()=>{active=false;cancelAnimationFrame(frame);resize.disconnect();mutation.disconnect();heading.removeEventListener('animationend',settle);layer.replaceChildren();heading.classList.remove('heading-lines-ready');};
  },[children,letters,stagger]);
  return <Tag {...props} data-reveal={typeof props['data-reveal']==='string'?props['data-reveal']:''} className={`line-heading ${props.className??''}`}><span className="heading-source" ref={source}>{children}</span><span className="heading-visual" ref={visual} aria-hidden="true"/></Tag>;
 }

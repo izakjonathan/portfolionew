@@ -27,7 +27,7 @@ export function useFrameNavigation(ids:string[],motion:boolean,blocked:boolean,s
   setDirection(forward);
   if(!animate){setPrevious(null);land();setPhase('idle');return;}
   locked.current=true;setPrevious(current.current);land();setPhase('entering');
-  timers.current.push(setTimeout(()=>{locked.current=false;setPrevious(null);setPhase('idle');},1200));
+  timers.current.push(setTimeout(()=>{locked.current=false;setPrevious(null);setPhase('idle');},2200));
  },[stage]);
  const step=useCallback((delta:number)=>go(current.current+delta),[go]);
  useEffect(()=>{
