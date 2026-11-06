@@ -4,7 +4,8 @@ import {useCallback,useEffect,useRef,useState,type RefObject} from 'react';
 /** One gesture advances one full frame. Trackpad momentum cannot queue more pages. */
 export function useFrameNavigation(ids:string[],motion:boolean,blocked:boolean,stage:RefObject<HTMLElement|null>){
  const [index,setIndex]=useState(0);
- const [phase,setPhase]=useState<'idle'|'leaving'|'entering'>('idle');
+ const [phase,setPhase]=useState<'idle'|'entering'>('idle');
+ const [previous,setPrevious]=useState<number|null>(null);
  const [direction,setDirection]=useState(1);
  const current=useRef(0),locked=useRef(false),timers=useRef<ReturnType<typeof setTimeout>[]>([]);
  const settings=useRef({ids,motion,blocked});
@@ -24,10 +25,9 @@ export function useFrameNavigation(ids:string[],motion:boolean,blocked:boolean,s
    if(focusWasInside)stage.current?.focus({preventScroll:true});
   };
   setDirection(forward);
-  if(!animate){land();setPhase('idle');return;}
-  locked.current=true;setPhase('leaving');
-  timers.current.push(setTimeout(()=>{land();setPhase('entering');},260));
-  timers.current.push(setTimeout(()=>{locked.current=false;setPhase('idle');},840));
+  if(!animate){setPrevious(null);land();setPhase('idle');return;}
+  locked.current=true;setPrevious(current.current);land();setPhase('entering');
+  timers.current.push(setTimeout(()=>{locked.current=false;setPrevious(null);setPhase('idle');},1200));
  },[stage]);
  const step=useCallback((delta:number)=>go(current.current+delta),[go]);
  useEffect(()=>{
@@ -89,5 +89,5 @@ export function useFrameNavigation(ids:string[],motion:boolean,blocked:boolean,s
   addEventListener('wheel',wheel,{passive:false});addEventListener('touchstart',touchStart,{passive:true});addEventListener('touchmove',touchMove,{passive:false});addEventListener('touchend',touchEnd,{passive:true});addEventListener('touchcancel',cancelTouch);addEventListener('keydown',key);
   return()=>{clearTimeout(quiet);removeEventListener('wheel',wheel);removeEventListener('touchstart',touchStart);removeEventListener('touchmove',touchMove);removeEventListener('touchend',touchEnd);removeEventListener('touchcancel',cancelTouch);removeEventListener('keydown',key);};
  },[go,step]);
- return{index:Math.min(index,ids.length-1),phase,direction,go};
+ return{index:Math.min(index,ids.length-1),previous,phase,direction,go};
 }
