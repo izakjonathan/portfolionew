@@ -15,3 +15,8 @@ test('old portfolio import preserves styling and custom content and is idempoten
 test('documents from before services and case studies still load safely',()=>{
  const old={...structuredClone(defaults)} as Record<string,unknown>;delete old.services;delete old.profileImage;const result=validateDocument(old);assert.deepEqual(result.services,[]);assert.equal(result.profileImage,'');assert.throws(()=>validateDocument({...old,services:[{id:'oops'}]}));assert.throws(()=>validateDocument({...old,profileImage:'javascript:alert(1)'}));
 });
+
+test('landing content defaults keep existing published documents compatible',()=>{
+ const old={...structuredClone(defaults)} as Record<string,unknown>;delete old.landingTitle;delete old.landingServices;
+ const result=validateDocument(old);assert.equal(result.landingTitle,'Design and\nDevelopment');assert.match(result.landingServices,/Concept development/);assert.throws(()=>validateDocument({...old,landingServices:'x'.repeat(81)}));
+});

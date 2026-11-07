@@ -1,9 +1,10 @@
+import {landingTitle,landingServices,serviceWords} from './landing.ts';
 import {projects as legacyProjects} from './legacy-projects.ts';
 export type Project = { id:string; title:string; category:string; year:string; description:string; image:string; alt:string; url:string; cropX:number; cropY:number; status?:string; subtitle?:string; challenge?:string; approach?:string; solution?:string; outcome?:string };
 export type Service = {id:string;title:string;label:string;description:string;tags:string};
-export type Document = { name:string; menuLabel:string; contactLabel:string; workLabel:string; background:string; foreground:string; aboutTitle:string; about:string; workTitle:string; contactTitle:string; email:string; instagram:string; heroImage:string; heroAlt:string; heroX:number; heroY:number; grain:number; motion:boolean; parallax:boolean; projects:Project[]; services:Service[]; profileImage:string };
+export type Document = { name:string; menuLabel:string; contactLabel:string; workLabel:string; background:string; foreground:string; aboutTitle:string; about:string; workTitle:string; contactTitle:string; email:string; instagram:string; heroImage:string; heroAlt:string; heroX:number; heroY:number; grain:number; motion:boolean; parallax:boolean; projects:Project[]; services:Service[]; profileImage:string; landingTitle:string; landingServices:string };
 const baseDefaults:Document = {
- services:[],profileImage:'',name:'Izak\nHyllested',menuLabel:'Menu',contactLabel:'Contact',workLabel:'Work',background:'#c6beac',foreground:'#bd1815',
+ landingTitle,landingServices,services:[],profileImage:'',name:'Izak\nHyllested',menuLabel:'Menu',contactLabel:'Contact',workLabel:'Work',background:'#c6beac',foreground:'#bd1815',
  aboutTitle:'A considered approach.',about:'Independent ideas. Thoughtful digital experiences. A selection of projects, brought together in one place.',workTitle:'Selected work',contactTitle:'Let’s make\nsomething good.',email:'',instagram:'',heroImage:'',heroAlt:'',heroX:50,heroY:50,grain:12,motion:true,parallax:true,
  projects:[
  {id:'plaisir',title:'Plaisir',category:'Digital experience',year:'2026',description:'A wine bar concept, translated into a digital experience.',image:'/projects/plaisir.svg',alt:'Plaisir typographic project cover',url:'https://plaisir-nu.vercel.app',cropX:50,cropY:50},
@@ -22,6 +23,8 @@ export function safeLink(v:string,kind:'image'|'link'='link'){
 export function validateDocument(value:unknown):Document{
  if(!record(value))throw new Error('Invalid document.');
  const d={} as Document;
+ d.landingTitle=str(value.landingTitle??landingTitle,200);d.landingServices=str(value.landingServices??landingServices,2000);
+ if(serviceWords(d.landingServices).length>20||serviceWords(d.landingServices).some(word=>word.length>80))throw new Error('Invalid landing services (maximum 20, 80 characters each).');
  for(const key of ['name','menuLabel','contactLabel','workLabel','aboutTitle','about','workTitle','contactTitle','email','instagram','heroImage','heroAlt'] as const)d[key]=str(value[key],key==='about'?5000:500);
  for(const key of ['name','menuLabel','contactLabel','workLabel'] as const)if(!d[key].trim()||d[key].length>60)throw new Error('Invalid navigation label (1–60 characters).');
  for(const key of ['background','foreground'] as const){const v=str(value[key],7);if(!/^#[0-9a-f]{6}$/i.test(v))throw new Error('Invalid colour.');d[key]=v;}

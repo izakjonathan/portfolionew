@@ -7,6 +7,7 @@ import RevealHeading from './RevealHeading';
 import TextReveals from './TextReveals';
 import PortfolioMenu from './PortfolioMenu';
 import PortfolioSplash from './PortfolioSplash';
+import LandingServices from './LandingServices';
 function UpArrow(){return <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.25"/></svg>;}
 function Arrow(){return <svg viewBox="0 0 42 76" fill="none" aria-hidden="true"><path d="M21 2v69M3 51l18 21 18-21" stroke="currentColor" strokeWidth="1.4"/></svg>;}
 function ProjectImage({project,parallax}:{project:Project;parallax:boolean}){return <div className={`project-image ${parallax?'frame-image-motion':''}`}>{project.image?<img src={project.image} alt={project.alt} loading="eager" style={{objectPosition:`${project.cropX}% ${project.cropY}%`}}/>:<div className="project-empty">{project.title}</div>}</div>;}
@@ -29,8 +30,8 @@ export default function Portfolio({initial=defaults,preview=false}:{initial?:Doc
   const service=document.services.find((service,i)=>(i===0?'services':`service-${service.id}`)===frameId);
   return (<section key={frameId} id={outgoing?undefined:frameId} inert={outgoing} aria-hidden={outgoing||undefined} className={`frame ${outgoing?'frame-outgoing':'frame-current'} ${frameId==='home'?'landing':activeProject?'work-frame':frameId==='work'?'empty-work-frame':`${frameId}-frame`}`} aria-label={frameId==='home'?`${document.name.replace('\n',' ')} portfolio`:activeProject?`${document.workTitle}: ${activeProject.title}`:frameId==='about'?'About':service?service.title.replace('\n',' '):frameId==='contact'?document.contactLabel:document.workTitle}>
     {frameId==='home'?<>
-     <h1 className="sr-only">{document.name.replace('\n',' ')} — Portfolio</h1>
      {document.heroImage&&<img className="hero-image" src={document.heroImage} alt={document.heroAlt} fetchPriority="high" style={{objectPosition:`${document.heroX}% ${document.heroY}%`}}/>}
+     <div className="landing-copy"><RevealHeading as="h1" className="landing-title">{document.landingTitle}</RevealHeading><LandingServices text={document.landingServices} enabled={document.motion} active={!outgoing&&!intro&&!menu&&!menuMounted&&!detail}/></div>
      <a href="#work" className="down" aria-label="Discover selected work" onClick={e=>{e.preventDefault();go('work');}}><Arrow/></a>
     </>:activeProject?<div className="frame-work-content">
      <header className="section-header"><RevealHeading>{document.workTitle}</RevealHeading><span>{String(projectIndex+1).padStart(2,'0')} / {String(document.projects.length).padStart(2,'0')}</span></header>
