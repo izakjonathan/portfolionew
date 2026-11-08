@@ -22,7 +22,7 @@ export default function PortfolioMenu({open,name,links,motion,onClose,onNavigate
  },[open,motion,onMounted]);
  return <dialog ref={dialog} className="menu-dialog" data-phase={phase} aria-label="Main menu" onCancel={e=>{e.preventDefault();onClose();}} onClose={onClose}>
   <div className="dialog-head"><span>{name}</span><button autoFocus onClick={onClose} aria-label="Close menu">Close <span aria-hidden="true">×</span></button></div>
-  <nav aria-label="Expanded navigation">{links.map(([id,label],i)=><a key={id} href={`#${id}`} style={{'--item':i} as CSSProperties} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();onNavigate(id);}}><span className="menu-index">0{i+1}</span><MenuLabel label={label}/><span className="menu-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.25"/></svg></span></a>)}</nav>
-  <span className="menu-foot">Independent ideas. Selected work.</span>
+  <div className="menu-layout"><div className="menu-intro"><span className="micro-label">Explore the practice</span><p>Ideas into<br/>identities.<br/>Design into<br/>digital.</p><span>Copenhagen, DK<br/>Working everywhere.</span></div><nav aria-label="Expanded navigation">{links.map(([id,label],i)=><a key={id} href={`#${id}`} style={{'--item':i} as CSSProperties} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();onNavigate(id);}}><span className="menu-index">0{i+1}</span><MenuLabel label={label}/><span className="menu-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.25"/></svg></span></a>)}</nav></div>
+  <div className="menu-foot"><span>Independent design & development</span><span>Good ideas deserve to be made.</span></div>
  </dialog>;
 }
